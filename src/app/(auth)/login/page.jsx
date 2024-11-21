@@ -3,9 +3,13 @@ import Link from 'next/link';
 import React, {useRef} from 'react';
 import { auth } from '@/lib/firebase-config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
 
 export default function page() {
 
+  const router = useRouter();
   const email = useRef(null);
   const pwd = useRef(null);
 
@@ -21,6 +25,7 @@ export default function page() {
       // Signed in 
       const user = userCredential.user;
       console.log(user);
+      router.push('/dashboard');
       // ...
     })
     .catch((error) => {
