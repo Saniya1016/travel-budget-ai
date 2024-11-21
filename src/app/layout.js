@@ -1,3 +1,4 @@
+import { Toaster } from 'sonner';
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -24,6 +25,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster 
+          richColors 
+          position="top-right" 
+          duration={3000} 
+        />
       </body>
     </html>
   );

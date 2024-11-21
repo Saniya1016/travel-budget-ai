@@ -1,4 +1,5 @@
 "use client";
+import Link from 'next/link';
 import React, {useRef} from 'react';
 import { auth } from '@/lib/firebase-config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -28,7 +29,6 @@ export default function page() {
       console.log(errorMessage, errorCode);
     });
 
-
   }
 
   return (
@@ -40,6 +40,17 @@ export default function page() {
               <input ref={email} type='email' placeholder='Enter email' className='p-3 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400'/>
               <input ref={pwd} type='password' placeholder='Enter password' className='p-3 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400'/>
               <button type='submit' className='p-3 bg-green-500 rounded-2xl hover:bg-green-600 transition duration-300'>LogIn</button>
+              <div className='text-center'>
+                <p>
+                  Don't have an account? {' '}
+                  <Link 
+                    href="/signup" 
+                    className='text-green-600 hover:underline'
+                  >
+                    Sign Up
+                  </Link>
+                </p>
+              </div>
           </form>
         </div>
     </div>
