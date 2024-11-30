@@ -13,28 +13,43 @@ export default function page() {
   const email = useRef(null);
   const pwd = useRef(null);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
 
     e.preventDefault();
 
-    const email_ = email.current.value;
-    const pwd_ = pwd.current.value;
+    try {
 
-    signInWithEmailAndPassword(auth, email_, pwd_)
-    .then((userCredential) => {
-      // Signed in 
+      const userCredential = await signInWithEmailAndPassword(
+        auth, 
+        email.current.value, 
+        pwd.current.value
+      );
+
       const user = userCredential.user;
-      console.log(user);
-      router.push('/dashboard');
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(errorMessage, errorCode);
-    });
 
-  }
+      //make call to login api to set cookies/token
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          idToken: await user.getIdToken(),
+          uid: user.uid
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Server authentication failed');
+      }
+
+      router.push('/dashboard');
+
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Login failed');
+    }
+  };
 
   return (
     <div>
@@ -61,4 +76,4 @@ export default function page() {
     </div>
     </div>
   )
-}
+};
