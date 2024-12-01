@@ -6,14 +6,14 @@ export async function POST(request) {
     try {
 
         const {idToken} = await request.json();
-        console.log('current user token in route', idToken);
+        // console.log('current user token in route', idToken);
         if(!idToken){
             return NextResponse.json({success: false, message: "No token provided"}, {status: 400});
         }
         
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         const uid = decodedToken.uid;
-        console.log('UID extracted from token:', uid);
+        // console.log('UID extracted from token:', uid);
 
         // Revoke refresh tokens using the UID
         await adminAuth.revokeRefreshTokens(uid);

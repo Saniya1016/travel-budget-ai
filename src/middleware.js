@@ -10,7 +10,7 @@ export async function middleware(request) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    console.log(token);
+    // console.log(token);
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/auth`, {
         method: 'POST',
