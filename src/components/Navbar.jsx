@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { signOut } from "firebase/auth";
 
 export default function Navbar() {
-  const [user, setUser] = useState(auth.currentUser); // Get the current user state
+  const [user, setUser] = useState((auth && auth.currentUser) || null); // Get the current user state
   const router = useRouter();
 
   const handleLogout = async () => {
