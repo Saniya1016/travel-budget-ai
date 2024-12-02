@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase-config";
-import { doc, updateDoc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 
 export async function PUT(req, context) {
     const params = await context.params;
     const { id } = params;
     const updateFields = await req.json();
-    // console.log('ID:', id);
-    // console.log(updateFields);
 
     try{
 
@@ -34,7 +32,21 @@ export async function PUT(req, context) {
 export async function DELETE(req, context){
     const params = await context.params;
     const { id } = params;
-    console.log('ID:', id);
+    // console.log('ID:', id);
 
-    return NextResponse.json({success: true}, {status: 200});
+    try{
+
+        if(!id){
+            return NextResponse.json({success: false, message: "id not defined"}, {status: 400});
+        }
+
+        const tripRef = doc(db, 'trips', id);
+        await deleteDoc(tripRef);
+
+        return NextResponse.json({success: true}, {status: 200});
+
+    } catch(error){
+        console.error(error);
+        return NextResponse.json({success: false, message: error.message}, {status: 500});
+    }
 }
