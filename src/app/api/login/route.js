@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const { idToken } = await request.json();
-    console.log(idToken);
+    // console.log(idToken);
 
     // Set HttpOnly, secure cookie
     const response = NextResponse.json({ success: true });
