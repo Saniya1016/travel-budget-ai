@@ -3,7 +3,7 @@
 export default function CreateTripButton() {
 
     const handleAdd = async () => {
-        
+        //redirect using router to a form page where user can enter all trip dets
     }
 
   return (
