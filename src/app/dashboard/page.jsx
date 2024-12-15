@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import CreateTripButton from "@/components/CreateTripButton";
+import TripLabel from "@/components/TripLabel";
 
 async function getTrips(userId){
 
@@ -12,11 +14,20 @@ async function getTrips(userId){
     },);
 
   const tripsData = await response.json();
-  return tripsData.trips;
+
+  const trips = tripsData.trips.map((trip) => ({
+    ...trip,
+    FromDate: trip.FromDate?.seconds
+      ? new Date(trip.FromDate.seconds * 1000).toLocaleDateString()
+      : "Unknown",
+    ToDate: trip.ToDate?.seconds
+      ? new Date(trip.ToDate.seconds * 1000).toLocaleDateString()
+      : "Unknown",
+  }));
+
+  return trips;
 
 }
-
-
 
 export default async function page() {
 
@@ -50,29 +61,13 @@ export default async function page() {
       ) : (
         <div className="mt-6 w-full max-w-4xl grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {trips.map((trip) => (
-            <div
-              key={trip.id}
-              className="bg-gray-800 shadow-md rounded-lg p-6 border border-gray-700 hover:shadow-lg hover:scale-105 transition transform duration-300"
-            >
-              <h3 className="text-xl font-semibold text-white mb-2">
-                {trip.destination}
-              </h3>
-              <p className="text-gray-300">
-                <span className="font-medium">Budget:</span> ${trip.budget}
-              </p>
-              <p className="text-gray-300">
-                <span className="font-medium">Dates:</span> {trip.startDate} -{" "}
-                {trip.endDate}
-              </p>
-            </div>
+            <TripLabel key={trip.id} trip={trip}/>
           ))}
         </div>
       )}
 
       {/* Add New Trip Button */}
-      <button className="mt-8 bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-500 hover:scale-105 transition transform duration-300">
-        + Add New Trip
-      </button>
+      <CreateTripButton />
     </div>
   );
 }

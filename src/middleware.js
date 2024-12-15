@@ -37,7 +37,4 @@ export async function middleware(request) {
 export const config = {
     matcher: ['/dashboard/:path*'], // Protect routes under /dashboard
 };
-
-
-  //do authentication for admin-firebase in an api route and call it in this middle ware file
   
