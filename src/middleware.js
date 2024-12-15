@@ -23,9 +23,14 @@ export async function middleware(request) {
       if (!res.ok) {
         return NextResponse.redirect(new URL('/login', request.url));
       }
-    
-      // Token is valid, allow the request to continue
-      return NextResponse.next();
+
+      const data = await res.json();
+
+      const response = NextResponse.next();
+      // console.log(data);
+      response.headers.set('user-id', data.userId);
+  
+      return response;
 
   }
   

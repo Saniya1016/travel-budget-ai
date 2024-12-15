@@ -15,7 +15,7 @@ export async function POST(request){
 
         const decodedToken = await adminAuth.verifyIdToken(token);
         // console.log('Decoded token:', decodedToken);
-        return NextResponse.json({ success: true }, { status: 200 });
+        return NextResponse.json({ success: true, userId: decodedToken.uid }, { status: 200 });
 
 
     } catch(error){
