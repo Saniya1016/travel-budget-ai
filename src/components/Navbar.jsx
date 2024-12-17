@@ -12,7 +12,7 @@ export default function Navbar() {
     try {
 
         const idToken = await auth.currentUser.getIdToken();
-        console.log('current user token', idToken);
+        // console.log('current user token', idToken);
         await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/logout`, {
             method: "POST",
             headers: {

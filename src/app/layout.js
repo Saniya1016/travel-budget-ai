@@ -2,6 +2,8 @@ import { Toaster } from 'sonner';
 import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from '@/components/Navbar';
+import 'react-datepicker/dist/react-datepicker.css';
+
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
