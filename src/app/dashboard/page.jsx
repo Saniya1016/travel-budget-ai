@@ -17,12 +17,8 @@ async function getTrips(userId){
 
   const trips = tripsData.trips.map((trip) => ({
     ...trip,
-    FromDate: trip.FromDate?.seconds
-      ? new Date(trip.FromDate.seconds * 1000).toLocaleDateString()
-      : "Unknown",
-    ToDate: trip.ToDate?.seconds
-      ? new Date(trip.ToDate.seconds * 1000).toLocaleDateString()
-      : "Unknown",
+    FromDate: new Date(trip.FromDate).toLocaleDateString(),
+    ToDate: new Date(trip.ToDate).toLocaleDateString(),
   }));
 
   return trips;

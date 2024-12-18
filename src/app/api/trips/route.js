@@ -15,7 +15,6 @@ export async function GET(request){
         querySnapshot.forEach((doc) => {
             trips.push({id: doc.id, ...doc.data()});
         });
-
         return NextResponse.json({success: true, trips}, {status: 200});
 
     } catch(error){

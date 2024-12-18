@@ -4,6 +4,7 @@ export default function TripLabel({trip}) {
 
     const handleViewTrip = async() => {
       console.log("view trip");
+      console.log(trip);
     }
 
   return (
@@ -12,7 +13,7 @@ export default function TripLabel({trip}) {
       
     >
         <h3 className="text-xl font-semibold text-white mb-2">
-        {trip.destination}
+        {trip.destination.name}
         </h3>
         <p className="text-gray-300">
         <span className="font-medium">Budget:</span> ${trip.budget}
