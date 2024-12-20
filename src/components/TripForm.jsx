@@ -4,11 +4,14 @@ import { useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import { LoadScript, StandaloneSearchBox } from "@react-google-maps/api";
 import { GeoPoint } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 const libraries = ["places"];
 
 
 export default function TripForm({userId}) {
+
+    const router = useRouter();
 
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(null);
@@ -45,7 +48,7 @@ export default function TripForm({userId}) {
           const resultData = await response.json();
           
           if (resultData.success) {
-              // router.push('/dashboard');
+              router.push('/dashboard'); //=> redirect to dashboard
           } else {
               console.error(resultData.message);
               // Optionally, add user-facing error handling

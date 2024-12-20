@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from '@/components/Navbar';
 import 'react-datepicker/dist/react-datepicker.css';
+import { TripProvider } from '@/lib/TripContext';
 
 
 const geistSans = localFont({
@@ -28,7 +29,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Navbar />
-        {children}
+        <TripProvider>{children}</TripProvider>
         <Toaster 
           richColors 
           position="top-right" 
