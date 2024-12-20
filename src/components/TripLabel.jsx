@@ -9,9 +9,8 @@ export default function TripLabel({trip}) {
     const {setCurrentTrip} = useTrip();
 
     const handleViewTrip = async() => {
-      console.log("view trip");
-      console.log(trip);
-      setCurrentTrip(trip);
+      const tripData = {...trip};
+      setCurrentTrip(tripData);
       router.push('/dashboard/tripDetails');
     }
 
