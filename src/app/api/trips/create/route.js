@@ -10,6 +10,7 @@ export async function POST(request){
         const tripData = await request.json();
         const { FromDate, ToDate, budget, destination, recommendations, spent, userId } = tripData;
         const remainder = budget - spent;
+        const expenses = [];
 
         const {isValid, errors} = validateTripData({ FromDate, ToDate, budget, destination, recommendations, remainder, userId }, false);
 
@@ -25,6 +26,7 @@ export async function POST(request){
             recommendations,
             spent,
             remainder,
+            expenses,
             userId,
         });
 

@@ -3,26 +3,39 @@ import { redirect } from "next/navigation";
 import CreateTripButton from "@/components/CreateTripButton";
 import TripLabel from "@/components/TripLabel";
 
+
 async function getTrips(userId){
-
-  const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/trips`, {
-    method: 'GET',
-    headers: {
+  try {
+    // console.log("Making request with userId:", userId);
+    
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/trips`, {
+      method: 'GET',
+      headers: {
         'Content-Type': 'application/json',
-        'userId': `${userId}`,
+        'userId': userId,
       }
-    },);
+    });
 
-  const tripsData = await response.json();
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error response:", errorData);
+      throw new Error(errorData.message || 'Failed to fetch trips');
+    }
 
-  const trips = tripsData.trips.map((trip) => ({
-    ...trip,
-    FromDate: new Date(trip.FromDate).toLocaleDateString(),
-    ToDate: new Date(trip.ToDate).toLocaleDateString(),
-  }));
+    const tripsData = await response.json();
+    // console.log("Received trips data:", tripsData);
 
-  return trips;
+    const trips = tripsData.trips.map((trip) => ({
+      ...trip,
+      FromDate: new Date(trip.FromDate).toLocaleDateString(),
+      ToDate: new Date(trip.ToDate).toLocaleDateString(),
+    }));
 
+    return trips;
+  } catch (error) {
+    console.error("Error in getTrips:", error);
+    throw error;
+  }
 }
 
 export default async function page() {

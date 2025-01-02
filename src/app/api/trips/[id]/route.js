@@ -25,7 +25,9 @@ export async function PUT(req, context) {
         }
 
         const tripData = tripDoc.data();
-        const amountSpent = updateFields.spent ? tripData.spent + updateFields.spent : tripData.spent;
+        // const amountSpent = updateFields.spent ? tripData.spent + updateFields.spent : tripData.spent;
+        const amountSpent = updateFields.expenses.reduce((accumulator, current) => accumulator + current.amount, 0);
+        console.log(amountSpent);
         
         const inputData = {
             FromDate: updateFields.FromDate || tripData.FromDate.toDate(),
