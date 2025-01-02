@@ -1,38 +1,35 @@
 import { NextResponse } from "next/server";
-import {db} from '@/lib/firebase-config';
-import {collection, addDoc} from 'firebase/firestore';
+import { adminDb } from "@/lib/firebase-admin";
 import { validateTripData } from "@/lib/validate-trip";
 
-export async function POST(request){
-    
+export async function POST(request) {
+
     try{
-
         const tripData = await request.json();
-        const { FromDate, ToDate, budget, destination, recommendations, spent, userId } = tripData;
-        const remainder = budget - spent;
+        const {FromDate, ToDate, budget, destination, userId} = tripData;
         const expenses = [];
+        const recommendations = [];
+        const spent = 0;
 
-        const {isValid, errors} = validateTripData({ FromDate, ToDate, budget, destination, recommendations, remainder, userId }, false);
+        const {isValid, errors} = validateTripData({ FromDate, ToDate, budget, destination, spent, userId }, false);
 
         if(!isValid){
-            return NextResponse.json({ success: false, message: errors }, { status: 400 });
+            return NextResponse.json({ success: false, message: errors }, { status: 401 });
         }
 
-        const tripRef = await addDoc(collection(db, "trips"), {
-            FromDate,
-            ToDate,
-            budget,
-            destination,
-            recommendations,
+        //create trip document in firestore
+        const tripRef = await adminDb.collection("trips").add({
             spent,
-            remainder,
             expenses,
-            userId,
+            recommendations,
+            ...tripData,
         });
 
-        return NextResponse.json({success: true, tripId: tripRef.id}, {status: 200});
+        return NextResponse.json({ success: true, tripId: tripRef.id }, { status: 201 });
 
     } catch(error){
-        return NextResponse.json({success: false, message: error.message}, {status: 500});
+        console.error("Error creating trips");
+        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
+    
 }

@@ -26,7 +26,7 @@ export function validateTripData(data, isUpdate){ //remove isUpdate and give all
         errors.push("Budget cannot be less than 0");
     }
 
-    if(data.remainder < 0){
+    if(data.budget - data.spent < 0){
         errors.push("Amount spent cannot exceed budget");
     }
 
