@@ -8,6 +8,8 @@ export default function TripPage() {
 
     if (!currentTrip) return (<div>No trip selected</div>);
 
+    //make frontend to update trip features
+    //api call to update route
     return (
         <div>
             <h1>Trip Details</h1>
