@@ -39,8 +39,6 @@ export default function TripForm({userId}) {
                   ToDate: endDate,
                   budget: budgetRef.current.value,
                   destination: selectedPlace,
-                  recommendations: [],
-                  spent: 0,
                   userId: userId,
               }),
           });

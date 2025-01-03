@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase-config";
-import { deleteDoc, doc, updateDoc, getDoc } from "firebase/firestore";
 import { validateTripData } from "@/lib/validate-trip";
+import { adminDb } from "@/lib/firebase-admin";
 
-export async function PUT(req, context) {
-    const params = await context.params;
-    const { id } = params;
-    const updateFields = await req.json();
+export async function PUT(request, context){
+
+    const params = await context.params; //get id from dynamic route
+    const {id} = params;
+    const updateFields = await request.json(); //get parameters from body
 
     try {
+
         if (!id) {
             return NextResponse.json({ success: false, message: "ID not defined" }, { status: 400 });
         }
@@ -17,59 +18,60 @@ export async function PUT(req, context) {
             return NextResponse.json({ success: false, message: "Update fields not defined" }, { status: 400 });
         }
 
-        const tripRef = doc(db, "trips", id);
-        const tripDoc = await getDoc(tripRef);
+        const tripRef = adminDb.collection("trips").doc(id);
+        const tripSnapshot = await tripRef.get();
 
-        if (!tripDoc.exists()) {
+        if (!tripSnapshot.exists) {
             return NextResponse.json({ success: false, message: "Trip not found" }, { status: 404 });
         }
 
-        const tripData = tripDoc.data();
-        // const amountSpent = updateFields.spent ? tripData.spent + updateFields.spent : tripData.spent;
-        const amountSpent = updateFields.expenses.reduce((accumulator, current) => accumulator + current.amount, 0);
-        console.log(amountSpent);
+        // Ensure the userId matches the trip owner (for security purposes)
+        if (tripSnapshot.data().userId !== updateFields.userId) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
+        }
         
-        const inputData = {
-            FromDate: updateFields.FromDate || tripData.FromDate.toDate(),
-            ToDate: updateFields.ToDate || tripData.ToDate.toDate(),
-            destination: updateFields.destination || tripData.destination,
-            recommendations: updateFields.recommendations || tripData.recommendations,
-            spent: amountSpent,
-            remainder: tripData.budget - amountSpent,
-        };
+        //amount spent needs to be added
+        updateFields.spent = updateFields.expenses.reduce((accumulator, current) => accumulator + current.amount, 0);
+        const {isValid, errors} = validateTripData(updateFields, true);
 
-        const { isValid, errors } = validateTripData(inputData, true);
-        if (!isValid) {
-            return NextResponse.json({ success: false, message: errors }, { status: 400 });
+        if(!isValid){
+            return NextResponse.json({ success: false, message: errors }, { status: 401 });
         }
 
-        await updateDoc(tripRef, updateFields);
+        await tripRef.update(updateFields);
+        return NextResponse.json({ success: true, message: "Trip updated successfully" }, { status: 200 });
 
-        return NextResponse.json({ success: true }, { status: 200 });
-
-    } catch (error) {
-        console.error(error);
+    } catch(error){
+        console.error("Error updating trip:", error);
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }
 
 
 
-export async function DELETE(context) {
+export async function DELETE(request, context){
     const params = await context.params;
-    const { id } = params;
+    const {id} = params;
 
-    try {
-        if (!id) {
+    try{
+
+        if(!id){
             return NextResponse.json({ success: false, message: "ID not defined" }, { status: 400 });
         }
 
-        const tripRef = doc(db, "trips", id);
-        await deleteDoc(tripRef);
+        const tripRef = adminDb.collection("trips").doc(id);
+        const tripSnapshot = await tripRef.get();
+    
+        if (!tripSnapshot.exists) {
+          return NextResponse.json({ success: false, message: "Trip not found" }, { status: 404 });
+        }
+    
+        // Delete the trip document
+        await tripRef.delete();
+        return NextResponse.json({ success: true, message: "Trip deleted successfully" }, { status: 200 });
 
-        return NextResponse.json({ success: true }, { status: 200 });
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    }catch(error){
+        console.error("Error deleting trip:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }
