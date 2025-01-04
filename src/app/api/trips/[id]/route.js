@@ -32,14 +32,21 @@ export async function PUT(request, context){
         
         //amount spent needs to be added
         updateFields.spent = updateFields.expenses.reduce((accumulator, current) => accumulator + current.amount, 0);
+
         const {isValid, errors} = validateTripData(updateFields, true);
 
         if(!isValid){
             return NextResponse.json({ success: false, message: errors }, { status: 401 });
         }
 
+        const allowedFields = ["expenses", "budget", "spent"];
+        
+        Object.keys(updateFields).forEach((key) => {
+            if (!allowedFields.includes(key)) {delete updateFields[key]};
+        });
+
         await tripRef.update(updateFields);
-        return NextResponse.json({ success: true, message: "Trip updated successfully" }, { status: 200 });
+        return NextResponse.json({ success: true, message: "Trip updated successfully", trip: updatedTrip.data() }, { status: 200 });
 
     } catch(error){
         console.error("Error updating trip:", error);
