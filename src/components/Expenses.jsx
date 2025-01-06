@@ -15,47 +15,58 @@ export default function Expenses({expenses, setExpenses}) {
   }
 
   return (
+    <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
+      <h2 className="text-2xl font-semibold text-gray-100 mb-4">Expenses</h2>
 
-    <div>
-
-      <h2>Expenses</h2>
-
-      {/* display expenses */}
-      <ul>
-        {
+      {/* Display expenses */}
+      <ul className="space-y-2 mb-6">
+        {expenses.length > 0 ? (
           expenses.map((expense, index) => (
-            <li key={index}>
-              {expense.category}: ${expense.amount}
+            <li
+              key={index}
+              className="flex justify-between items-center bg-gray-700 p-3 rounded-lg shadow-sm"
+            >
+              <span className="font-medium text-gray-200">{expense.category}</span>
+              <span className="text-gray-300">${expense.amount.toFixed(2)}</span>
             </li>
           ))
-        }
+        ) : (
+          <li className="text-gray-500 text-sm italic">No expenses added yet.</li>
+        )}
       </ul>
 
-      {/* add expense */}
-      <div>
-        <input 
-          type="number"
-          placeholder="Amount"
-          value={expenseInput.amount}
-          onChange={(e) => setExpenseInput({...expenseInput, amount: e.target.value})}
-        />
+      {/* Add expense form */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <input
+            type="number"
+            placeholder="Amount"
+            value={expenseInput.amount}
+            onChange={(e) => setExpenseInput({ ...expenseInput, amount: e.target.value })}
+            className="w-full sm:w-auto p-3 bg-gray-700 text-gray-300 border border-gray-600 rounded-lg focus:outline-none focus:ring focus:ring-blue-500"
+          />
 
-        <select
-          value={expenseInput.category}
-          placeholder="Category"
-          onChange={(e) => setExpenseInput({...expenseInput, category: e.target.value})}
+          <select
+            value={expenseInput.category}
+            onChange={(e) => setExpenseInput({ ...expenseInput, category: e.target.value })}
+            className="w-full sm:w-auto p-3 bg-gray-700 text-gray-300 border border-gray-600 rounded-lg focus:outline-none focus:ring focus:ring-blue-500"
+          >
+            <option value="" disabled>
+              Select Category
+            </option>
+            <option value="food">Food</option>
+            <option value="activities">Activities</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <button
+          onClick={handleAddExpense}
+          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-300"
         >
-          <option value="food">Food</option>
-          <option value="activities">Activities</option>
-          <option value="other">Other</option>
-
-        </select>
+          Add Expense
+        </button>
       </div>
-
-      <button onClick={handleAddExpense}>
-        Add Expense
-      </button>
-
     </div>
-  )
+  );
 }

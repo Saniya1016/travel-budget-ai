@@ -66,34 +66,34 @@ export default function TripPage() {
     if (!currentTrip) return (<div>No trip selected</div>);
 
     return (
-        <div>
-
-            <h1>Trip Details</h1>
-
+        <div className="p-6 bg-gray-900 text-gray-200 rounded-lg shadow-md max-w-3xl mx-auto">
+          <h1 className="text-3xl font-semibold text-gray-100 mb-6">Trip Details</h1>
+    
+          <div className="space-y-4">
             <p>
-                <span className="font-medium">Destination:</span>{" "}
-                {currentTrip.destination.name}
+              <span className="font-medium text-gray-400">Destination:</span>{" "}
+              {currentTrip.destination.name}
             </p>
-
             <p>
-                <span className="font-medium">Budget:</span> ${budget}
+              <span className="font-medium text-gray-400">Budget:</span> ${budget}
             </p>
-
             <p>
-                <span className="font-medium">Spent:</span> ${spent}
+              <span className="font-medium text-gray-400">Spent:</span> ${spent}
             </p>
-
             <p>
-                <span className="font-medium">Remaining:</span> ${budget - spent}
+              <span className="font-medium text-gray-400">Remaining:</span> $
+              {(budget - spent).toFixed(2)}
             </p>
-
-
-            <Expenses expenses={expenses} setExpenses={setExpenses}/>
-
-            <button onClick={handleSaveChanges}>
-                Save Changes
-            </button>
-            
+          </div>
+    
+          <Expenses expenses={expenses} setExpenses={setExpenses} />
+    
+          <button
+            onClick={handleSaveChanges}
+            className="mt-6 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-300 w-full sm:w-auto"
+          >
+            Save Changes
+          </button>
         </div>
-    );
+      );
 }
