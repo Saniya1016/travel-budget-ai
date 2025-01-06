@@ -5,7 +5,7 @@ import { useState } from "react";
 export default function Expenses({expenses, setExpenses}) {
 
   
-  const [expenseInput, setExpenseInput] = useState({amount: "", category: ""});
+  const [expenseInput, setExpenseInput] = useState({amount: "", category: "food"});
 
   const handleAddExpense = () => {
     if (!expenseInput.amount || isNaN(expenseInput.amount)) return;

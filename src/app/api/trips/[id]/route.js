@@ -46,7 +46,9 @@ export async function PUT(request, context){
         });
 
         await tripRef.update(updateFields);
-        return NextResponse.json({ success: true, message: "Trip updated successfully", trip: updatedTrip.data() }, { status: 200 });
+        const updatedTripSnapshot = await tripRef.get();
+        const updatedTrip = updatedTripSnapshot.data();
+        return NextResponse.json({ success: true, message: "Trip updated successfully", trip: updatedTrip }, { status: 200 });
 
     } catch(error){
         console.error("Error updating trip:", error);
