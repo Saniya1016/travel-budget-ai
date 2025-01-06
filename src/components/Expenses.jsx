@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 export default function Expenses({expenses, setExpenses}) {
 
@@ -12,6 +13,11 @@ export default function Expenses({expenses, setExpenses}) {
     const newExpense = { amount: parseFloat(expenseInput.amount), category: expenseInput.category };
     setExpenses([...expenses, newExpense]);
     setExpenseInput({ amount: "", category: "food" });
+  }
+
+  const handleDeleteExpense = (removeIndex) => {
+    const updatedExpenses = expenses.filter((exp,index) => index !== removeIndex);
+    setExpenses([...updatedExpenses]);
   }
 
   return (
@@ -28,6 +34,13 @@ export default function Expenses({expenses, setExpenses}) {
             >
               <span className="font-medium text-gray-200">{expense.category}</span>
               <span className="text-gray-300">${expense.amount.toFixed(2)}</span>
+              <button 
+                onClick={() => handleDeleteExpense(index)} 
+                className="text-red-600 hover:text-red-800 transition-colors duration-200 p-2 rounded-lg focus:outline-none focus:ring focus:ring-red-500"
+                aria-label="Delete"
+              >
+                <RiDeleteBin6Line className="w-5 h-5" />
+            </button>
             </li>
           ))
         ) : (
