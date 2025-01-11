@@ -46,6 +46,8 @@ export async function POST(request){
     }
 }
 
+
+
 function getTripDuration(startDate, endDate) {
     const start = new Date(startDate); // Convert startDate string to Date object
     const end = new Date(endDate); // Convert endDate string to Date object
@@ -58,6 +60,8 @@ function getTripDuration(startDate, endDate) {
 
     return durationInDays;
 }
+
+
 
 async function fetchPlaces({ lat, lng, radius, type, keyword, budget, preferences, duration }) {
     
