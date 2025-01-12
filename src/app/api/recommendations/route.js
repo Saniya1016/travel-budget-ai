@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import OpenAI from "openai";
 
 //first get input body - start, end dates, budget, destination, preferences : {for now food - 50% activities-50%}
 //send details to Google api
