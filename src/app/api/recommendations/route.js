@@ -1,51 +1,65 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-//first get input body - start, end dates, budget, destination, preferences : {for now food - 50% activities-50%}
-//send details to Google api
-//get recommendations
 
-//send the recommendations to openai with prompt
-//fetch grouped results by day
+
+const defaultTags = {
+
+    food: [
+        "restaurant", 
+        "cafe",
+        "bar"],
+
+    activities: [
+        "tourist_attraction",
+        "amusement_park",
+        "aquarium",
+        "art_gallery",
+        "museum",
+        "shopping_mall",
+        "park",
+        "night_club",
+        "zoo"]
+};
+
+
+
 
 export async function POST(request){
-    try{
+
+    try {
+
         const tripData = await request.json();
-        console.log(tripData);
         const {startDate, endDate, destination, budget, preferences} = tripData;
+        const foodPreferences = preferences.food;
+        const activityPreferences = preferences.activities;
         const duration = getTripDuration(startDate, endDate);
+        const [lat, lng] = destination.coordinates.split(',');
+        const radius = 5000; // in meters
 
-        //google api call
-        const [lat, lng] = destination.split(',');
-        const radius = 5000; // in meters, adjust based on your needs
+        const foodResults = await fetchPlaces({lat, lng, radius, type: 'food', budget, preferences: foodPreferences, duration});
+        const activityResults = await fetchPlaces({lat, lng, radius, type: 'activities', budget, preferences: activityPreferences, duration}) ;
 
-        const food = await fetchPlaces({
-            lat,
-            lng,
-            radius,
-            type: "restaurant",
-            budget,
-            preferences: preferences.food,
-            duration,
-        });
+        const dailyPlan = await getAllocation(foodResults.places, 
+                                                activityResults.places, 
+                                                preferences, 
+                                                duration,
+                                                destination.name,
+                                                {
+                                                    food: foodResults.budgetInfo,
+                                                    activities: activityResults.budgetInfo
+                                                });
 
-        const activities = await fetchPlaces({
-            lat,
-            lng,
-            radius,
-            type: "tourist attraction",
-            budget,
-            preferences: preferences.activities,
-            duration,
-        });
+        return NextResponse.json({success: true, result: dailyPlan}, {status: 200});
 
-        return NextResponse.json({ success: true, result: {food, activities} }, { status: 200 });
+        
 
     } catch(error){
-        console.error("Failed to Get Recommendations: ", error);
-        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+        console.error(error);
+        return NextResponse.json({success: false, message: error.message}, {status: 500});
     }
 }
+
 
 
 
@@ -64,59 +78,185 @@ function getTripDuration(startDate, endDate) {
 
 
 
-async function fetchPlaces({ lat, lng, radius, type, keyword, budget, preferences, duration }) {
-    
+
+function convertBudgetToPriceLevel(budget, duration, percentAllocation, type){
+
+    const dailyBudget = (budget * (percentAllocation / 100)) / duration;
+
+    const priceThresholds = {
+        food: {
+            // Per day thresholds (assuming 3 meals)
+            1: 45,    // Up to $45/day (~$15 per meal)
+            2: 90,    // Up to $90/day (~$30 per meal)
+            3: 180,   // Up to $180/day (~$60 per meal)
+            4: 300    // Over $180/day ($100+ per meal)
+        },
+        activities: {
+            // Per day thresholds (assuming 1-2 activities)
+            1: 50,    // Up to $50/day
+            2: 100,   // Up to $100/day
+            3: 200,   // Up to $200/day
+            4: 400    // Over $200/day
+        }
+    };
+
+    const thresholds = priceThresholds[type];
+    let maxPriceLevel = 4;
+    for (const [level, threshold] of Object.entries(thresholds)){
+        if(dailyBudget <= threshold){
+            maxPriceLevel = level;
+            break;
+        }
+    }
+
+    return {
+        maxPriceLevel,
+        TotalDailyBudget: dailyBudget,
+        estimatedCosts: type === 'food' ? {
+            perMeal: dailyBudget / 3,
+            perDay: dailyBudget
+        } : {
+            perActivity: dailyBudget / 2,
+            perDay: dailyBudget
+        }
+    };
+}
+
+
+
+
+async function fetchPlaces({lat, lng, radius, type, budget, preferences, duration}){
+
+    const types = preferences.tags || defaultTags[type];
+    const typeString = Array.isArray(types) ? types.join('|') : types;
+
     const params = new URLSearchParams({
         location: `${lat},${lng}`,
         radius: radius.toString(),
         key: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
     });
 
-    if (type) params.append("type", type);
-    if (keyword) params.append("keyword", keyword);
+    if (typeString) {params.append("type", typeString);}
 
     try{
+
         const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?${params.toString()}`);
         const data = await response.json();
 
-        if (data.status !== "OK") {
-            console.error("Failed to fetch places:", results);
+        if(data.status !== 'OK'){
+            console.error("Failed to fetch places:", data);
             return [];
         }
 
         const results = data.results.map((place) => ({
             name: place.name,
+            place_id: place.place_id,
             address: place.vicinity,
             rating: place.rating || 0,
             price_level: place.price_level || 0,
             opening_hours: place.opening_hours || "Not Available",
         }));
 
-        const specificBudget = budget * (preferences.percent / 100);
-        const dailyBudget = (specificBudget / duration).toFixed(2);
+        const budgetInfo = convertBudgetToPriceLevel(budget, duration, preferences.percent, type);
 
-        const priceThresholds = {
-            1: 30,   // $ - Up to $30/day (~$10/meal)
-            2: 75,   // $$ - Up to $75/day (~$25/meal)
-            3: 150,  // $$$ - Up to $150/day (~$50/meal)
-            4: 300   // $$$$ - Over $150/day (>$50/meal)
+        return {
+            places: results.filter((place) => 
+                !place.price_level || place.price_level <= budgetInfo.maxPriceLevel
+            ),
+            budgetInfo
         };
 
-        let maxPriceLevel = 4;
-        for (const [level, threshold] of Object.entries(priceThresholds)) {
-            if (dailyBudget <= threshold) {
-                maxPriceLevel = parseInt(level);
-                break;
-            }
-        }
-
-        return results.filter((place) => 
-            !place.price_level || place.price_level <= maxPriceLevel
-        );
-
-
     } catch(error){
-        console.error("Error parsing response from Google Places:", error);
-        return [];
+        console.error(error);
+        return { places: [], budgetInfo: null };
+    }
+}
+
+
+async function getAllocation(food, activities, preferences, duration, destination, budgetInfo) {
+    const openai = new OpenAI({
+        apiKey: process.env.NEXT_OPENAI_API_KEY
+    });
+
+    const systemPrompt = `You are a travel planning expert who creates personalized daily itineraries. 
+                        Your expertise includes:
+                        - Balancing daily schedules between meals and activities
+                        - Strategic timing of activities between meals
+                        - Optimizing for highly-rated venues
+                        - Maintaining variety in cuisine and activity types
+                        - Ensuring all recommendations stay within budget constraints`;
+
+    const userPrompt = `Create a ${duration}-day trip itinerary in Chicago with the following parameters:
+
+                        BUDGET CONSTRAINTS:
+                        Food (${preferences.food.percent}% of budget):
+                        - Daily Budget: $${budgetInfo.food.TotalDailyBudget.toFixed(2)}
+                        - Per meal estimate: $${budgetInfo.food.estimatedCosts.perMeal.toFixed(2)}
+                        Price level guide: $ (<$15), $$ ($15-30), $$$ ($30-60), $$$$ (>$60)
+
+                        Activities (${preferences.activities.percent}% of budget):
+                        - Daily Budget: $${budgetInfo.activities.TotalDailyBudget.toFixed(2)}
+                        - Per activity estimate: $${budgetInfo.activities.estimatedCosts.perActivity.toFixed(2)}
+                        Price level guide: $ (<$25), $$ ($25-50), $$$ ($50-100), $$$$ (>$100)
+
+                        AVAILABLE VENUES:
+                        Restaurants:
+                        ${food.map(f => `- ${f.name} (Rating: ${f.rating}, Price: ${f.price_level ? '$'.repeat(f.price_level) : 'N/A'})`).join('\n')}
+
+                        Activities:
+                        ${activities.map(a => `- ${a.name} (Rating: ${a.rating}, Price: ${a.price_level ? '$'.repeat(a.price_level) : 'N/A'})`).join('\n')}
+
+                        REQUIREMENTS:
+                        1. Each day must include:
+                        - 3 meals (breakfast, lunch, dinner)
+                        - 1-2 activities, balanced between morning and afternoon
+                        2. Strictly adhere to daily budgets for both food and activities
+                        3. Prioritize venues rated 4.0 or higher
+                        4. No venue should be repeated across the itinerary
+                        5. Account for a logical flow of locations throughout the day
+                        6. Balance indoor and outdoor activities when possible
+
+                        FORMAT EACH DAY AS FOLLOWS:
+                        Day X - [Date]:
+                        Morning:
+                        - Breakfast: [Venue Name] (Rating: X.X, Price Level: $) - $XX
+                        - Activity: [Venue Name] (Rating: X.X, Price Level: $) - $XX
+
+                        Afternoon:
+                        - Lunch: [Venue Name] (Rating: X.X, Price Level: $) - $XX
+                        - Activity: [Venue Name] (Rating: X.X, Price Level: $) - $XX
+
+                        Evening:
+                        - Dinner: [Venue Name] (Rating: X.X, Price Level: $) - $XX
+
+                        Daily Totals:
+                        - Food: $XX / $${budgetInfo.food.TotalDailyBudget.toFixed(2)} budget
+                        - Activities: $XX / $${budgetInfo.activities.TotalDailyBudget.toFixed(2)} budget
+
+                        After the itinerary, include a brief analysis explaining:
+                        1. Why specific venues were chosen for each day
+                        2. How the budget was optimized
+                        3. Any notable highlights or special recommendations`;
+
+    try {
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4",
+            messages: [
+                {
+                    "role": "system",
+                    "content": systemPrompt
+                },
+                {
+                    "role": "user",
+                    "content": userPrompt
+                }
+            ],
+            temperature: 0.7
+        });
+
+        return completion.choices[0].message.content;
+    } catch (error) {
+        console.error("Error getting OpenAI allocation:", error);
+        throw error;
     }
 }
