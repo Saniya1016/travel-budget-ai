@@ -22,9 +22,6 @@ const defaultTags = {
         "zoo"]
 };
 
-
-
-
 export async function POST(request){
 
     try {
@@ -40,6 +37,9 @@ export async function POST(request){
         const foodResults = await fetchPlaces({lat, lng, radius, type: 'food', budget, preferences: foodPreferences, duration});
         const activityResults = await fetchPlaces({lat, lng, radius, type: 'activities', budget, preferences: activityPreferences, duration}) ;
 
+        console.log("Fetched reccommendations");
+        console.log("allocating activities and food recommendations according to budget.....");
+
         const dailyPlan = await getAllocation(foodResults.places, 
                                                 activityResults.places, 
                                                 preferences, 
@@ -48,7 +48,9 @@ export async function POST(request){
                                                 {
                                                     food: foodResults.budgetInfo,
                                                     activities: activityResults.budgetInfo
-                                                });
+                                                },
+                                            startDate,
+                                            endDate);
 
         return NextResponse.json({success: true, result: dailyPlan}, {status: 200});
 
@@ -73,7 +75,7 @@ function getTripDuration(startDate, endDate) {
     // Convert milliseconds to days (1 day = 24 * 60 * 60 * 1000 ms)
     const durationInDays = Math.ceil(differenceInMilliseconds / (1000 * 60 * 60 * 24));
 
-    return durationInDays;
+    return durationInDays+1;
 }
 
 
@@ -173,10 +175,18 @@ async function fetchPlaces({lat, lng, radius, type, budget, preferences, duratio
 }
 
 
-async function getAllocation(food, activities, preferences, duration, destination, budgetInfo) {
+async function getAllocation(food, activities, preferences, duration, destination, budgetInfo, startDate, endDate) {
     const openai = new OpenAI({
         apiKey: process.env.NEXT_OPENAI_API_KEY
     });
+
+    const dates = [];
+    let currentDate = new Date(startDate);
+    const endDateTime = new Date(endDate);
+    while (currentDate <= endDateTime) {
+        dates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
 
     const systemPrompt = `You are a travel planning expert who creates personalized daily itineraries. 
                         Your expertise includes:
@@ -186,7 +196,7 @@ async function getAllocation(food, activities, preferences, duration, destinatio
                         - Maintaining variety in cuisine and activity types
                         - Ensuring all recommendations stay within budget constraints`;
 
-    const userPrompt = `Create a ${duration}-day trip itinerary in Chicago with the following parameters:
+    const userPrompt = `Create a ${duration}-day trip itinerary in ${destination} with the following parameters:
 
                         BUDGET CONSTRAINTS:
                         Food (${preferences.food.percent}% of budget):
@@ -238,15 +248,15 @@ async function getAllocation(food, activities, preferences, duration, destinatio
                         "dayX": {
                             "date": "YYYY-MM-DD",
                             "morning": {
-                            "breakfast": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX },
-                            "activity": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX }
+                            "breakfast": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX },
+                            "activity": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX }
                             },
                             "afternoon": {
-                            "lunch": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX },
-                            "activity": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX }
+                            "lunch": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX },
+                            "activity": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX }
                             },
                             "evening": {
-                            "dinner": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX }
+                            "dinner": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX }
                             },
                             "daily_totals": {
                             "food": "$XX",
@@ -259,10 +269,29 @@ async function getAllocation(food, activities, preferences, duration, destinatio
                         },
                         ...
                         }
+                        
+                        ONLY return valid JSON as the output, with no additional text or commentary.
+                        
+                    IMPORTANT FORMAT RULES:
+                    1. Dates must be in exact order: ${dates.join(', ')}
+                    2. Price levels must be numbers (1, 2, 3, or 4), not $ symbols
+                    3. Costs must be numbers without $ symbol
+                    4. Ratings must be numbers between 0 and 5
 
-                        ONLY return valid JSON as the output, with no additional text or commentary.`;
+                    Example of REQUIRED format for one day:
+                    {
+                    "day1": {
+                        "date": "${dates[0]}",
+                        "morning": {
+                        "breakfast": { "name": "Venue Name", "rating": 4.5, "price_level": 2, "cost": 25 },
+                        "activity": { "name": "Venue Name", "rating": 4.3, "price_level": 3, "cost": 45 }
+                        },
+                        ...
+                    }
+                    }`;
 
     try {
+        console.log("daily allocation processing ....... ");
         const completion = await openai.chat.completions.create({
             model: "gpt-4",
             messages: [
@@ -277,9 +306,10 @@ async function getAllocation(food, activities, preferences, duration, destinatio
             ],
             temperature: 0.7
         });
+        console.log("plan made !!");
         const plan = JSON.parse(completion.choices[0].message.content);
         return plan;
-        
+
     } catch (error) {
         console.error("Error getting OpenAI allocation:", error);
         throw error;
