@@ -233,10 +233,34 @@ async function getAllocation(food, activities, preferences, duration, destinatio
                         - Food: $XX / $${budgetInfo.food.TotalDailyBudget.toFixed(2)} budget
                         - Activities: $XX / $${budgetInfo.activities.TotalDailyBudget.toFixed(2)} budget
 
-                        After the itinerary, include a brief analysis explaining:
-                        1. Why specific venues were chosen for each day
-                        2. How the budget was optimized
-                        3. Any notable highlights or special recommendations`;
+                        RETURN THE ITINERARY STRICTLY AS A JSON OBJECT WITH THIS FORMAT:
+                        {
+                        "dayX": {
+                            "date": "YYYY-MM-DD",
+                            "morning": {
+                            "breakfast": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX },
+                            "activity": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX }
+                            },
+                            "afternoon": {
+                            "lunch": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX },
+                            "activity": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX }
+                            },
+                            "evening": {
+                            "dinner": { "name": "Venue Name", "rating": X.X, "price_level": "$", "cost": $XX }
+                            },
+                            "daily_totals": {
+                            "food": "$XX",
+                            "activities": "$XX",
+                            "total_budget": {
+                                "food": "$${budgetInfo.food.TotalDailyBudget.toFixed(2)}",
+                                "activities": "$${budgetInfo.activities.TotalDailyBudget.toFixed(2)}"
+                                }
+                            }
+                        },
+                        ...
+                        }
+
+                        ONLY return valid JSON as the output, with no additional text or commentary.`;
 
     try {
         const completion = await openai.chat.completions.create({
@@ -253,8 +277,9 @@ async function getAllocation(food, activities, preferences, duration, destinatio
             ],
             temperature: 0.7
         });
-
-        return completion.choices[0].message.content;
+        const plan = JSON.parse(completion.choices[0].message.content);
+        return plan;
+        
     } catch (error) {
         console.error("Error getting OpenAI allocation:", error);
         throw error;
