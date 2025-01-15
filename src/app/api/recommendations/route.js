@@ -38,6 +38,10 @@ export async function POST(request){
         const foodResults = await fetchPlaces({lat, lng, radius, type: 'food', budget, preferences: foodPreferences, duration});
         const activityResults = await fetchPlaces({lat, lng, radius, type: 'activities', budget, preferences: activityPreferences, duration}) ;
 
+        if(!foodResults.budgetInfo || !activityResults.budgetInfo){
+            return NextResponse.json({success: false, message: "Error fetching results from Google API"}, {status: 400});
+        }
+
         console.log("Fetched reccommendations");
         console.log("allocating activities and food recommendations according to budget.....");
 
@@ -136,10 +140,13 @@ async function fetchPlaces({lat, lng, radius, type, budget, preferences, duratio
         location: `${lat},${lng}`,
         radius: radius.toString(),
         key: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+        // rankby: 'rating' // Prioritize highly-rated places
+        // fields: 'name,place_id,vicinity,rating,price_level,opening_hours', // Specify only needed fields
     });
 
     if (typeString) {params.append("type", typeString);}
 
+    //todo : add pagination handling and concatenate all pages into results
     try{
 
         const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?${params.toString()}`);
@@ -191,28 +198,80 @@ async function getAllocation(food, activities, preferences, duration, destinatio
     const systemPrompt = SYSTEM_PROPMT;
     const userPrompt = generateUserPrompt(duration, destination, preferences, budgetInfo, food, activities, dates);
 
-    try {
-        console.log("daily allocation processing ....... ");
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4",
-            messages: [
-                {
-                    "role": "system",
-                    "content": systemPrompt
-                },
-                {
-                    "role": "user",
-                    "content": userPrompt
-                }
-            ],
-            temperature: 0.7
-        });
-        console.log("plan made !!");
-        const plan = JSON.parse(completion.choices[0].message.content);
-        return plan;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1000; // 1 second
+    const TIMEOUT_DURATION = 60000; // 60 seconds
 
+    const makeOpenAIRequest = async (retryCount = 0) => {
+        try {
+            console.log("daily allocation processing ....... ");
+
+            // Create a promise that rejects after the timeout
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => {
+                    reject(new Error('Request timed out'));
+                }, TIMEOUT_DURATION);
+            });
+
+            // Create the OpenAI API request promise
+            const apiPromise = openai.chat.completions.create({
+                model: "gpt-4",
+                messages: [
+                    {
+                        "role": "system",
+                        "content": systemPrompt
+                    },
+                    {
+                        "role": "user",
+                        "content": userPrompt
+                    }
+                ],
+                temperature: 0.7,
+            });
+
+            // Race between the timeout and the API request
+            const completion = await Promise.race([
+                apiPromise,
+                timeoutPromise
+            ]);
+
+            let plan;
+            try {
+                plan = JSON.parse(completion.choices[0].message.content);
+                console.log("plan made !!");
+            } catch (parseError) {
+                throw new Error('Failed to parse OpenAI response as JSON');
+            }
+
+            validatePlan(plan, dates);
+            return plan;
+
+        } catch (error) {
+            if (error.message === 'Request timed out') {
+                console.error("Request timed out");
+                if (retryCount < MAX_RETRIES) {
+                    await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
+                    return makeOpenAIRequest(retryCount + 1);
+                }
+            }
+            throw error;
+        }
+    };
+
+    try {
+        return await makeOpenAIRequest();
     } catch (error) {
         console.error("Error getting OpenAI allocation:", error);
         throw error;
     }
+}
+
+function validatePlan(plan, dates) {
+    // Ensure all required dates are present
+    dates.forEach((date, index) => {
+        const dayKey = `day${index + 1}`;
+        if (!plan[dayKey] || plan[dayKey].date !== date) {
+            throw new Error(`Invalid plan structure: missing or incorrect date for ${dayKey}`);
+        }
+    });
 }
