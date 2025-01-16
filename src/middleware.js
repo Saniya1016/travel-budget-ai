@@ -27,7 +27,7 @@ export async function middleware(request) {
       const data = await res.json();
 
       const response = NextResponse.next();
-      // console.log(data);
+      
       response.headers.set('user-id', data.userId);
   
       return response;

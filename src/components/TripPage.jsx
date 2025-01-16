@@ -4,6 +4,7 @@ import { useTrip } from "@/lib/TripContext";
 import { useEffect, useState } from "react";
 import Expenses from "./Expenses";
 import Recommendations from "./Recommendations";
+import BudgetGraph from "./BudgetGraph";
 
 
 //make frontend to update trip features
@@ -71,7 +72,11 @@ export default function TripPage() {
 
     return (
         <div className="p-6 bg-gray-900 text-gray-200 rounded-lg shadow-md max-w-3xl mx-auto">
-          <h1 className="text-3xl font-semibold text-gray-100 mb-6">Trip Details</h1>
+
+          <div className="flex flex-row justify-between">
+            <h1 className="text-3xl font-semibold text-gray-100 mb-6">Trip Details</h1>
+            <BudgetGraph budget={budget} spent={spent}/>
+          </div>
     
           <div className="space-y-4">
             <p>
