@@ -14,6 +14,7 @@ export default function TripPage() {
 
     const [budget, setBudget] = useState(currentTrip.budget);
     const [spent, setSpent] = useState(currentTrip.spent);
+    const [recommendations, setRecommendations] = useState(currentTrip.recommendations || []);
     const [expenses, setExpenses] = useState(currentTrip.expenses);
 
     const handleSaveChanges = async () => {
@@ -29,6 +30,7 @@ export default function TripPage() {
                     budget,
                     spent,
                     expenses,
+                    recommendations,
                   })
             });
 
