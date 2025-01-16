@@ -39,7 +39,7 @@ export async function PUT(request, context){
             return NextResponse.json({ success: false, message: errors }, { status: 401 });
         }
 
-        const allowedFields = ["expenses", "budget", "spent"];
+        const allowedFields = ["expenses", "budget", "spent", "recommendations"];
         
         Object.keys(updateFields).forEach((key) => {
             if (!allowedFields.includes(key)) {delete updateFields[key]};

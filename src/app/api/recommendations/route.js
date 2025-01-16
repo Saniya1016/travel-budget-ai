@@ -32,7 +32,8 @@ export async function POST(request){
         const foodPreferences = preferences.food;
         const activityPreferences = preferences.activities;
         const duration = getTripDuration(startDate, endDate);
-        const [lat, lng] = destination.coordinates.split(',');
+        const lat = destination.coordinates.latitude;
+        const lng = destination.coordinates.longitude;
         const radius = 5000; // in meters
 
         const foodResults = await fetchPlaces({lat, lng, radius, type: 'food', budget, preferences: foodPreferences, duration});
@@ -57,7 +58,9 @@ export async function POST(request){
                                                 startDate,
                                                 endDate);
 
-        return NextResponse.json({success: true, result: dailyPlan}, {status: 200});
+        const resultArray = Object.values(dailyPlan);
+
+        return NextResponse.json({success: true, result: resultArray}, {status: 200});
 
         
 

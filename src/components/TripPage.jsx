@@ -3,6 +3,7 @@
 import { useTrip } from "@/lib/TripContext";
 import { useEffect, useState } from "react";
 import Expenses from "./Expenses";
+import Recommendations from "./Recommendations";
 
 
 //make frontend to update trip features
@@ -46,6 +47,7 @@ export default function TripPage() {
                     budget,
                     spent,
                     expenses,
+                    recommendations,
                 });
                 alert("Trip updated successfully!");
 
@@ -89,6 +91,8 @@ export default function TripPage() {
           </div>
     
           <Expenses expenses={expenses} setExpenses={setExpenses} />
+
+          <Recommendations recommendations={recommendations} setRecommendations={setRecommendations} currentTripData={currentTrip}/>
     
           <button
             onClick={handleSaveChanges}
@@ -96,6 +100,7 @@ export default function TripPage() {
           >
             Save Changes
           </button>
+
         </div>
       );
 }

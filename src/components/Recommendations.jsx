@@ -28,11 +28,14 @@ export default function Recommendations({recommendations, setRecommendations, cu
                     preferences,
                 })
             });
-
-            const data = await response.json();
-            if(data.status !== 'OK'){
+            
+            if(!response.ok){
                 throw new Error("Error in fetching recommendations");
             }
+
+            const data = await response.json();
+            const dailyPlan = data.result;
+            setRecommendations([...dailyPlan]);
 
         } catch(error){
             console.error(error);
