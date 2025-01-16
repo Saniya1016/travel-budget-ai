@@ -46,7 +46,7 @@ export default async function page() {
   const headersList = await headers();
   const userId = headersList.get('user-id');
 
-  console.log(userId);
+  // console.log(userId);
 
   if (!userId) {
     redirect('/login');

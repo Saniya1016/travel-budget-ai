@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { IoMdArrowDropdown } from "react-icons/io";
 
 export default function DayLabel({day, index}) {
 
@@ -18,17 +19,19 @@ export default function DayLabel({day, index}) {
   return (
     <div>
         <div
-            className="text-lg font-bold text-gray-200 cursor-pointer"
+            className="flex flex-row items-center gap-x-3 text-lg font-bold text-gray-200 cursor-pointer"
             onClick={() => toggleDay(index)}
         >
             Day {index + 1} - {day.date}
+            <IoMdArrowDropdown />
         </div>
 
         {openDay === index && (
-            <div className="mt-3 text-gray-300">
-                {/* Morning */}
-                <div className="cursor-pointer" onClick={() => toggleMeal("morning")}>
+        <div className="mt-3 text-gray-300">
+            {/* Morning */}
+            <div className="flex flex-row items-center gap-x-3 cursor-pointer" onClick={() => toggleMeal("morning")}>
                 <h4 className="font-semibold text-gray-200">Morning</h4>
+                <IoMdArrowDropdown />
             </div>
 
             {openMeal === "morning" && (
@@ -43,8 +46,9 @@ export default function DayLabel({day, index}) {
             )}
 
             {/* Afternoon */}
-            <div className="cursor-pointer" onClick={() => toggleMeal("afternoon")}>
+            <div className="flex flex-row items-center gap-x-3 cursor-pointer" onClick={() => toggleMeal("afternoon")}>
                 <h4 className="font-semibold text-gray-200 mt-2">Afternoon</h4>
+                <IoMdArrowDropdown />
             </div>
 
             {openMeal === "afternoon" && (
@@ -60,8 +64,9 @@ export default function DayLabel({day, index}) {
             )}
 
             {/* Evening */}
-            <div className="cursor-pointer" onClick={() => toggleMeal("evening")}>
+            <div className="flex flex-row items-center gap-x-3 cursor-pointer" onClick={() => toggleMeal("evening")}>
                 <h4 className="font-semibold text-gray-200 mt-2">Evening</h4>
+                <IoMdArrowDropdown />
             </div>
             {openMeal === "evening" && (
             <div className="ml-4">
