@@ -1,5 +1,7 @@
 //note: make sure to give remaining budget as budget to api/recommendation
 
+import DayLabel from "./DayLabel";
+
 export default function Recommendations({recommendations, setRecommendations, currentTripData}) {
 
     const handleGetRecommendations = async () => {
@@ -51,8 +53,8 @@ export default function Recommendations({recommendations, setRecommendations, cu
         {
             recommendations.length > 0 ? (
                 recommendations.map((recommendation, index) => (
-                    <li key={index}>
-
+                    <li key={index} className="bg-gray-700 p-4 rounded-lg">
+                        <DayLabel day={recommendation} index={index}/>
                     </li>
                 ))
             ): (
