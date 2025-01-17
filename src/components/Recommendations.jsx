@@ -2,11 +2,15 @@
 
 import { api } from "@/lib/services/api";
 import DayLabel from "./DayLabel";
+import { useState } from "react";
+
 
 export default function Recommendations({recommendations, setRecommendations, currentTripData}) {
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const handleGetRecommendations = async () => {
-        //post request to api/rec route
+
         const {FromDate, ToDate, destination, budget, spent} = currentTripData;
 
         const remainingBudget = budget - spent;
@@ -18,7 +22,7 @@ export default function Recommendations({recommendations, setRecommendations, cu
                         };
 
         try{
-
+            setIsLoading(true);
             const sendTripData = {
                         startDate: FromDate,
                         endDate: ToDate,
@@ -35,6 +39,8 @@ export default function Recommendations({recommendations, setRecommendations, cu
         } catch(error){
             console.error(error);
             console.log("Failed to fetch iteneray: ", error.message);
+        } finally{
+            setIsLoading(false);
         }
     }
 
@@ -58,8 +64,13 @@ export default function Recommendations({recommendations, setRecommendations, cu
 
       <button
       onClick={handleGetRecommendations}
-      className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-300"
-      > Generate Itenerary </button>
+      className={`w-full sm:w-auto text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-300 ${
+        isLoading ? "bg-gray-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+      }`}
+      disabled={isLoading}
+      > 
+        {isLoading? "Generating ... " : "Generate Itenerary" } 
+      </button>
     </div>
   )
 }
