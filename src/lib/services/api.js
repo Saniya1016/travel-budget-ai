@@ -43,6 +43,11 @@ export const api = {
     deleteTrip: (tripId, userId) => fetchApi(`/api/trips/${tripId}`, null, {
         method: 'DELETE',
         body: JSON.stringify({userId}),
+    }),
+
+    getRecommendations: (tripData) => fetchApi(`/api/recommendations`, null, {
+        method: 'POST',
+        body: JSON.stringify(tripData),
     })
 
 };

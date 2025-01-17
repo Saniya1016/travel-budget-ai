@@ -1,5 +1,6 @@
 //note: make sure to give remaining budget as budget to api/recommendation
 
+import { api } from "@/lib/services/api";
 import DayLabel from "./DayLabel";
 
 export default function Recommendations({recommendations, setRecommendations, currentTripData}) {
@@ -17,25 +18,17 @@ export default function Recommendations({recommendations, setRecommendations, cu
                         };
 
         try{
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/recommendations`, {
-                method: 'POST',
-                headers: {
-                'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    startDate: FromDate,
-                    endDate: ToDate,
-                    destination,
-                    budget: remainingBudget,
-                    preferences,
-                })
-            });
-            
-            if(!response.ok){
-                throw new Error("Error in fetching recommendations");
-            }
 
-            const data = await response.json();
+            const sendTripData = {
+                        startDate: FromDate,
+                        endDate: ToDate,
+                        destination,
+                        budget: remainingBudget,
+                        preferences,
+                    }
+            const data = await api.getRecommendations(sendTripData);
+
+
             const dailyPlan = data.result;
             setRecommendations([...dailyPlan]);
 
