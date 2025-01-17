@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import { LoadScript, StandaloneSearchBox } from "@react-google-maps/api";
 import { GeoPoint } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/services/api";
 
 const libraries = ["places"];
 
@@ -29,28 +30,23 @@ export default function TripForm({userId}) {
         console.log(startDate, endDate, budgetRef.current.value, selectedPlace);
 
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/trips/create`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                  FromDate: startDate,
-                  ToDate: endDate,
-                  budget: budgetRef.current.value,
-                  destination: selectedPlace,
-                  userId: userId,
-              }),
-          });
-          
-          const resultData = await response.json();
+
+          const tripData = {FromDate: startDate,
+                          ToDate: endDate,
+                          budget: budgetRef.current.value,
+                          destination: selectedPlace,
+                          userId: userId
+                      }
+
+          const resultData = await api.createTrip(tripData);
           
           if (resultData.success) {
               router.push('/dashboard'); //=> redirect to dashboard
           } else {
               console.error(resultData.message);
-              // Optionally, add user-facing error handling
+              //add user-facing error handling
           }
+
       } catch (error) {
           console.error("Error creating trip:", error);
           // Add error handling for network or other issues

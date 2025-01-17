@@ -2,28 +2,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import CreateTripButton from "@/components/CreateTripButton";
 import TripLabel from "@/components/TripLabel";
+import { api } from "@/lib/services/api";
 
 
 async function getTrips(userId){
   try {
-    // console.log("Making request with userId:", userId);
-    
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/trips`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'userId': userId,
-      }
-    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Error response:", errorData);
-      throw new Error(errorData.message || 'Failed to fetch trips');
-    }
-
-    const tripsData = await response.json();
-    // console.log("Received trips data:", tripsData);
+    const tripsData = await api.getAllTrips(userId);
 
     const trips = tripsData.trips.map((trip) => ({
       ...trip,
@@ -32,8 +17,9 @@ async function getTrips(userId){
     }));
 
     return trips;
+
   } catch (error) {
-    console.error("Error in getTrips:", error);
+    console.error("Error in getAllTrips:", error);
     throw error;
   }
 }
@@ -45,8 +31,6 @@ export default async function page() {
 
   const headersList = await headers();
   const userId = headersList.get('user-id');
-
-  // console.log(userId);
 
   if (!userId) {
     redirect('/login');
