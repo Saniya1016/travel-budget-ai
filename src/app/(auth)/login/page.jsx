@@ -1,6 +1,6 @@
 "use client";
 import Link from 'next/link';
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import { auth } from '@/lib/firebase-config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -13,13 +13,14 @@ export default function page() {
   const router = useRouter();
   const email = useRef(null);
   const pwd = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e) => {
 
     e.preventDefault();
 
     try {
-
+      setIsLoading(true);
       const userCredential = await signInWithEmailAndPassword(
         auth, 
         email.current.value, 
@@ -44,6 +45,8 @@ export default function page() {
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Login failed');
+    } finally{
+      setIsLoading(false);
     }
   };
 
@@ -55,7 +58,14 @@ export default function page() {
               <h1 className='text-2xl sm:text-3xl font-semibold text-center text-gray-800'>LogIn!</h1>
               <input ref={email} type='email' placeholder='Enter email' className='p-3 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400'/>
               <input ref={pwd} type='password' placeholder='Enter password' className='p-3 rounded-md border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400'/>
-              <button type='submit' className='p-3 bg-green-500 rounded-2xl hover:bg-green-600 transition duration-300'>LogIn</button>
+              <button type='submit' 
+                  className={`p-3 rounded-2xl transition duration-300 ${
+                    isLoading ? "bg-gray-600 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                  }`}
+                  disabled={isLoading}
+              >
+              {isLoading? "Logging In ... " : "Log In" } 
+              </button>
               <div className='text-center'>
                 <p>
                   Don't have an account? {' '}
