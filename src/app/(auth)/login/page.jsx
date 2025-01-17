@@ -5,6 +5,7 @@ import { auth } from '@/lib/firebase-config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { api } from '@/lib/services/api';
 
 
 export default function page() {
@@ -28,18 +29,13 @@ export default function page() {
       const user = userCredential.user;
 
       //make call to login api to set cookies/token
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          idToken: await user.getIdToken(),
-          uid: user.uid
-        })
-      });
+      
+      const response = await api.loginUser({
+            idToken: await user.getIdToken(),
+            uid: user.uid
+          })
 
-      if (!response.ok) {
+      if (!response.success) {
         throw new Error('Server authentication failed');
       }
 

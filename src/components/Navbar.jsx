@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase-config';
 import { useState, useEffect } from 'react';
 import { signOut } from "firebase/auth";
+import { api } from '@/lib/services/api';
 
 export default function Navbar() {
   const [user, setUser] = useState((auth && auth.currentUser) || null); // Get the current user state
@@ -12,14 +13,8 @@ export default function Navbar() {
     try {
 
         const idToken = await auth.currentUser.getIdToken();
-        // console.log('current user token', idToken);
-        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/logout`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ idToken }),
-        });
+
+        await api.logoutUser({idToken});
 
         await signOut(auth);
         router.push("/login");

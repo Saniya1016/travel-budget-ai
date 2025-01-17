@@ -48,6 +48,15 @@ export const api = {
     getRecommendations: (tripData) => fetchApi(`/api/recommendations`, null, {
         method: 'POST',
         body: JSON.stringify(tripData),
-    })
+    }),
 
+    loginUser: (credentials) => fetchApi(`/api/login`, null, {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+    }),
+
+    logoutUser: (token) => fetchApi(`/api/logout`, null, {
+        method: 'POST',
+        body: JSON.stringify(token),
+    }),
 };
