@@ -70,7 +70,7 @@ export default async function page() {
       ) : (
         <div className="mt-6 w-full max-w-4xl grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {trips.map((trip) => (
-            <TripLabel key={trip.id} trip={trip}/>
+            <TripLabel key={trip.id} trip={trip} userId={userId}/>
           ))}
         </div>
       )}

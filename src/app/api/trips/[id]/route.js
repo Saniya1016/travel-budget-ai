@@ -61,6 +61,8 @@ export async function PUT(request, context){
 export async function DELETE(request, context){
     const params = await context.params;
     const {id} = params;
+    const {userId} = await request.json();
+    console.log(userId);
 
     try{
 
@@ -73,6 +75,12 @@ export async function DELETE(request, context){
     
         if (!tripSnapshot.exists) {
           return NextResponse.json({ success: false, message: "Trip not found" }, { status: 404 });
+        }
+
+        const data = tripSnapshot.data();
+
+        if(data.userId !== userId){
+            return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 404 });
         }
     
         // Delete the trip document

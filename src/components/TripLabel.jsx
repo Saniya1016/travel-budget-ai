@@ -2,8 +2,9 @@
 
 import { useTrip } from "@/lib/TripContext";
 import { useRouter } from "next/navigation";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
-export default function TripLabel({trip}) {
+export default function TripLabel({trip, userId}) {
 
     const router = useRouter();
     const {setCurrentTrip} = useTrip();
@@ -12,6 +13,29 @@ export default function TripLabel({trip}) {
       const tripData = {...trip};
       setCurrentTrip(tripData);
       router.push('/dashboard/tripDetails');
+    }
+
+    const handleTripDelete = async() => {
+      try{
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/trips/${trip.id}`, {
+          method: 'DELETE',
+          headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              userId,
+            })
+        });
+
+        if(!response.ok){
+          console.log("Error deleteing trip");
+        } 
+        alert("Trip Deleted");
+        router.push('/dashboard');
+
+      } catch(error){
+        console.error("Failed to delete trip: ", error);
+      }
     }
 
   return (
@@ -28,10 +52,14 @@ export default function TripLabel({trip}) {
         <span className="font-medium">Dates:</span> {trip.FromDate} -{" "}
         {trip.ToDate}
         </p>
-        <div className="flex items-center gap-2 mt-4">
-          <span onClick={handleViewTrip} className="px-3 py-1 bg-green-500 text-white text-xs rounded-lg">
+        <div className="flex items-center justify-between gap-2 mt-4">
+          <button onClick={handleViewTrip} className="px-3 py-1 bg-green-500 hover:bg-green-200 text-white text-xs rounded-lg">
             View Details
-          </span>
+          </button>
+
+          <button onClick={handleTripDelete} className="text-red-600 hover:bg-red-200"> 
+            <RiDeleteBin6Line className="w-5 h-5" /> 
+          </button>
         </div>
 
     </div>
