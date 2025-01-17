@@ -2,6 +2,7 @@
 
 import { useTrip } from "@/lib/TripContext";
 import { useEffect, useState } from "react";
+import { api } from "@/lib/services/api";
 import Expenses from "./Expenses";
 import Recommendations from "./Recommendations";
 import BudgetGraph from "./BudgetGraph";
@@ -20,27 +21,17 @@ export default function TripPage() {
     const [expenses, setExpenses] = useState(currentTrip.expenses);
 
     const handleSaveChanges = async () => {
-        try{
+        try {
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/trips/${currentTrip.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    ...currentTrip,
-                    budget,
-                    spent,
-                    expenses,
-                    recommendations,
-                  })
-            });
-
-            if(!response.ok){
-                throw new Error("Failed To Save Changes");
+            const newTripData = {
+              ...currentTrip,
+              budget,
+              spent,
+              expenses,
+              recommendations,
             }
 
-            const data = await response.json();
+            const data = await api.updateTrip(currentTrip.id, newTripData);
 
             if(data.success){
                 setCurrentTrip({

@@ -1,5 +1,6 @@
 "use client";
 
+import { api } from "@/lib/services/api";
 import { useTrip } from "@/lib/TripContext";
 import { useRouter } from "next/navigation";
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -17,21 +18,15 @@ export default function TripLabel({trip, userId}) {
 
     const handleTripDelete = async() => {
       try{
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/trips/${trip.id}`, {
-          method: 'DELETE',
-          headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              userId,
-            })
-        });
 
-        if(!response.ok){
+        const data = await api.deleteTrip(trip.id, userId);
+
+        if(!data.success){
           console.log("Error deleteing trip");
-        } 
-        alert("Trip Deleted");
-        router.push('/dashboard');
+        } else{
+          alert("Trip Deleted");
+          router.push('/dashboard');
+        }
 
       } catch(error){
         console.error("Failed to delete trip: ", error);

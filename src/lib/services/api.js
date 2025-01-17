@@ -35,14 +35,14 @@ export const api = {
         body: JSON.stringify(tripData),
     }),
 
-    updateTrip: (tripId, newTripData) => fetchApi(`api/trips/${tripId}`, null, {
+    updateTrip: (tripId, newTripData) => fetchApi(`/api/trips/${tripId}`, null, {
         method: 'PUT',
         body: JSON.stringify(newTripData),
     }),
 
-    deleteTrip: (tripId, userId) => fetchApi(`api/trips/${tripId}`, null, {
+    deleteTrip: (tripId, userId) => fetchApi(`/api/trips/${tripId}`, null, {
         method: 'DELETE',
-        body: JSON.stringify(userId),
+        body: JSON.stringify({userId}),
     })
 
 };
