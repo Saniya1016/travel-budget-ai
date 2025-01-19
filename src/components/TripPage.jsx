@@ -15,11 +15,6 @@ export default function TripPage() {
 
     const { currentTrip, setCurrentTrip } = useTrip();
 
-    // const [budget, setBudget] = useState(currentTrip.budget || 0);
-    // const [spent, setSpent] = useState(currentTrip.spent || 0);
-    // const [recommendations, setRecommendations] = useState(currentTrip.recommendations || []);
-    // const [expenses, setExpenses] = useState(currentTrip.expenses || []);
-
     const [budget, setBudget] = useState(0);
     const [spent, setSpent] = useState(0);
     const [recommendations, setRecommendations] = useState([]);
