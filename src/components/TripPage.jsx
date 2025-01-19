@@ -15,10 +15,15 @@ export default function TripPage() {
 
     const { currentTrip, setCurrentTrip } = useTrip();
 
-    const [budget, setBudget] = useState(currentTrip.budget);
-    const [spent, setSpent] = useState(currentTrip.spent);
-    const [recommendations, setRecommendations] = useState(currentTrip.recommendations || []);
-    const [expenses, setExpenses] = useState(currentTrip.expenses);
+    // const [budget, setBudget] = useState(currentTrip.budget || 0);
+    // const [spent, setSpent] = useState(currentTrip.spent || 0);
+    // const [recommendations, setRecommendations] = useState(currentTrip.recommendations || []);
+    // const [expenses, setExpenses] = useState(currentTrip.expenses || []);
+
+    const [budget, setBudget] = useState(0);
+    const [spent, setSpent] = useState(0);
+    const [recommendations, setRecommendations] = useState([]);
+    const [expenses, setExpenses] = useState([]);
 
     const handleSaveChanges = async () => {
         try {
@@ -52,6 +57,25 @@ export default function TripPage() {
             alert("An error occurred while saving the changes.");
         }
     }
+
+    useEffect(() => {
+      if (currentTrip) {
+        localStorage.setItem("currentTrip", JSON.stringify(currentTrip));
+      }
+    }, [currentTrip]);
+    
+    useEffect(() => {
+      const savedTrip = localStorage.getItem("currentTrip");
+      if (savedTrip) {
+        const parsedTrip = JSON.parse(savedTrip);
+        setCurrentTrip(parsedTrip);
+        setBudget(parsedTrip.budget);
+        setSpent(parsedTrip.spent);
+        setRecommendations(parsedTrip.recommendations || []);
+        setExpenses(parsedTrip.expenses || []);
+      }
+    }, []);
+    
 
     useEffect(() => {
         const AmountSpent = expenses.reduce((accumulator, current) => accumulator + current.amount, 0);
