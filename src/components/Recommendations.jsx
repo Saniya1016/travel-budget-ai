@@ -1,25 +1,25 @@
-//note: make sure to give remaining budget as budget to api/recommendation
-
 import { api } from "@/lib/services/api";
 import DayLabel from "./DayLabel";
 import { useState } from "react";
+import Preferences from "./Preferences";
 
 
 export default function Recommendations({recommendations, setRecommendations, currentTripData}) {
 
     const [isLoading, setIsLoading] = useState(false);
 
+    const default_preferences = { 
+        food: { percent: 50, tags: ["restaurant", "cafe"] },
+        activities: { percent: 50, tags: ["tourist_attraction"] }
+      };
+
+    const [preferences, setPreferences] = useState(default_preferences);
+
     const handleGetRecommendations = async () => {
 
         const {FromDate, ToDate, destination, budget, spent} = currentTripData;
 
         const remainingBudget = budget - spent;
-
-        //default preferences - temporary
-        const preferences = { 
-                            food: { percent: 50, tags: ["restaurant", "cafe"] },
-                            activities: { percent: 50, tags: ["tourist_attraction"] }
-                        };
 
         try{
             setIsLoading(true);
@@ -47,6 +47,9 @@ export default function Recommendations({recommendations, setRecommendations, cu
   return (
     <div className="mt-8 bg-gray-800 p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold text-gray-100 mb-4">Recommendations</h2>
+
+      <h4 className="text-xl font-semibold text-gray-100 mb-4">Preferences: (optional) </h4>
+      <Preferences preferences={preferences} setPreferences={setPreferences}/>
 
       <ul className="space-y-2 mb-6">
         {

@@ -203,7 +203,7 @@ async function getAllocation(food, activities, preferences, duration, destinatio
 
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 1000; // 1 second
-    const TIMEOUT_DURATION = 60000; // 60 seconds
+    const TIMEOUT_DURATION = 120000; // 120 seconds
 
     const makeOpenAIRequest = async (retryCount = 0) => {
         try {
