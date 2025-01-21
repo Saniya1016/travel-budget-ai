@@ -9,6 +9,7 @@ const fetchApi = async (endpoint, userId=null, options={}) => {
 
         const response = await fetch(url, {
             headers: defaultHeaders,
+            credentials: 'include', // Ensures cookies are sent with the request
             ...options,
           });
 
