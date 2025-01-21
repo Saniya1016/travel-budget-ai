@@ -183,7 +183,7 @@ export default function TripPage() {
       setRecommendations(parsedTrip.recommendations || []);
       setExpenses(parsedTrip.expenses || []);
     }
-  }, []);
+  }, [setCurrentTrip]);
 
   useEffect(() => {
     const AmountSpent = expenses.reduce(

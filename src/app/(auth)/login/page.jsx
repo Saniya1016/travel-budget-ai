@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/services/api';
 
 
-export default function page() {
+export default function Page() {
 
   const router = useRouter();
   const email = useRef(null);
@@ -68,7 +68,7 @@ export default function page() {
               </button>
               <div className='text-center'>
                 <p>
-                  Don't have an account? {' '}
+                  Don&#39;t have an account? {' '}
                   <Link 
                     href="/signup" 
                     className='text-green-600 hover:underline'

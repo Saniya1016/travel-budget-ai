@@ -60,7 +60,7 @@ export default function Recommendations({ recommendations, setRecommendations, c
           ))
         ) : (
           <li className="text-gray-400 text-center italic">
-            Hit the "Generate Itinerary" button to see your itinerary!
+            Hit the &#39;Generate Itinerary&#39; button to see your itinerary!
           </li>
         )}
       </ul>

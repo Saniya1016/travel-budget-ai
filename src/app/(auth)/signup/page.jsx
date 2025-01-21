@@ -6,7 +6,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export default function page() {
+export default function Page() {
 
   const router = useRouter();
   const email = useRef(null);
