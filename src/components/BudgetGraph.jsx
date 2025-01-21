@@ -6,18 +6,18 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 export default function BudgetGraph({ budget, spent }) {
     const remaining = budget - spent;
 
-    // Data for the Doughnut chart
     const data = {
         labels: ['Spent', 'Remaining'], // Labels for the sections
         datasets: [
-        {
-            data: [spent, remaining], // Values for the sections
-            backgroundColor: ['#FF6384', '#36A2EB'], // Colors for each section
-            hoverBackgroundColor: ['#FF4384', '#36A2DB'], // Hover effect colors
-            borderWidth: 1,
-        },
+            {
+                data: [spent, remaining], // Values for the sections
+                backgroundColor: ['#FF6384', '#4CAF50'], // Colors for each section (green for remaining)
+                hoverBackgroundColor: ['#FF4384', '#45A049'], // Hover effect colors (darker green for remaining)
+                borderWidth: 1,
+            },
         ],
     };
+    
 
     // Options for the Doughnut chart
     const options = {
