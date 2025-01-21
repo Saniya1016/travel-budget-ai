@@ -8,101 +8,49 @@ export const SYSTEM_PROPMT = `You are a travel planning expert who creates perso
 
 
 
-export const generateUserPrompt = (duration, destination, preferences, budgetInfo, food, activities, dates) => {                        
-
-        const userPrompt = `Create a ${duration}-day trip itinerary in ${destination} with the following parameters:
-
-                BUDGET CONSTRAINTS:
-                Food (${preferences.food.percent}% of budget):
-                - Daily Budget: $${budgetInfo.food.TotalDailyBudget.toFixed(2)}
-                - Per meal estimate: $${budgetInfo.food.estimatedCosts.perMeal.toFixed(2)}
-                Price level guide: $ (<$15), $$ ($15-30), $$$ ($30-60), $$$$ (>$60)
-
-                Activities (${preferences.activities.percent}% of budget):
-                - Daily Budget: $${budgetInfo.activities.TotalDailyBudget.toFixed(2)}
-                - Per activity estimate: $${budgetInfo.activities.estimatedCosts.perActivity.toFixed(2)}
-                Price level guide: $ (<$25), $$ ($25-50), $$$ ($50-100), $$$$ (>$100)
-
-                AVAILABLE VENUES:
-                Restaurants:
-                ${food.map(f => `- ${f.name} (Rating: ${f.rating}, Price: ${f.price_level ? '$'.repeat(f.price_level) : 'N/A'})`).join('\n')}
-
-                Activities:
-                ${activities.map(a => `- ${a.name} (Rating: ${a.rating}, Price: ${a.price_level ? '$'.repeat(a.price_level) : 'N/A'})`).join('\n')}
-
-                REQUIREMENTS:
-                1. Each day must include:
-                - 3 meals (breakfast, lunch, dinner)
-                - 1-2 activities, balanced between morning and afternoon
-                2. Strictly adhere to daily budgets for both food and activities
-                3. Prioritize venues rated 4.0 or higher
-                4. No venue should be repeated across the itinerary
-                5. Account for a logical flow of locations throughout the day
-                6. Balance indoor and outdoor activities when possible
-
-                FORMAT EACH DAY AS FOLLOWS:
-                Day X - [Date]:
-                Morning:
-                - Breakfast: [Venue Name] (Rating: X.X, Price Level: $) - $XX
-                - Activity: [Venue Name] (Rating: X.X, Price Level: $) - $XX
-
-                Afternoon:
-                - Lunch: [Venue Name] (Rating: X.X, Price Level: $) - $XX
-                - Activity: [Venue Name] (Rating: X.X, Price Level: $) - $XX
-
-                Evening:
-                - Dinner: [Venue Name] (Rating: X.X, Price Level: $) - $XX
-
-                Daily Totals:
-                - Food: $XX / $${budgetInfo.food.TotalDailyBudget.toFixed(2)} budget
-                - Activities: $XX / $${budgetInfo.activities.TotalDailyBudget.toFixed(2)} budget
-
-                RETURN THE ITINERARY STRICTLY AS A JSON OBJECT WITH THIS FORMAT:
-                {
-                "dayX": {
-                    "date": "YYYY-MM-DD",
-                    "morning": {
-                    "breakfast": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX },
-                    "activity": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX }
-                    },
-                    "afternoon": {
-                    "lunch": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX },
-                    "activity": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX }
-                    },
-                    "evening": {
-                    "dinner": { "name": "Venue Name", "rating": X.X, "price_level": "X", "cost": $XX }
-                    },
-                    "daily_totals": {
-                    "food": "$XX",
-                    "activities": "$XX",
-                    "total_budget": {
-                        "food": "$${budgetInfo.food.TotalDailyBudget.toFixed(2)}",
-                        "activities": "$${budgetInfo.activities.TotalDailyBudget.toFixed(2)}"
+export const generateUserPrompt = (duration, destination, preferences, budgetInfo, food, activities, dates) => {
+    const userPrompt = `Create a ${duration}-day ${destination} itinerary as JSON matching this exact structure:
+                        {
+                        "day1": {
+                            "date": "YYYY-MM-DD",
+                            "morning": {
+                            "breakfast": {"name": "string", "rating": number, "price_level": number, "cost": number},
+                            "activity": {"name": "string", "rating": number, "price_level": number, "cost": number}
+                            },
+                            "afternoon": {
+                            "lunch": {"name": "string", "rating": number, "price_level": number, "cost": number},
+                            "activity": {"name": "string", "rating": number, "price_level": number, "cost": number}
+                            },
+                            "evening": {
+                            "dinner": {"name": "string", "rating": number, "price_level": number, "cost": number}
+                            },
+                            "daily_totals": {
+                            "food": number,
+                            "activities": number,
+                            "total_budget": {
+                                "food": ${budgetInfo.food.TotalDailyBudget},
+                                "activities": ${budgetInfo.activities.TotalDailyBudget}
+                            }
+                            }
                         }
-                    }
-                },
-                ...
-                }
+                        }
 
-                ONLY return valid JSON as the output, with no additional text or commentary.
+                        Budget Limits:
+                        - Food (${preferences.food.percent}%): $${budgetInfo.food.TotalDailyBudget}/day ($${budgetInfo.food.estimatedCosts.perMeal}/meal)
+                        - Activities (${preferences.activities.percent}%): $${budgetInfo.activities.TotalDailyBudget}/day ($${budgetInfo.activities.estimatedCosts.perActivity}/activity)
 
-                IMPORTANT FORMAT RULES:
-                1. Dates must be in exact order: ${dates.join(', ')}
-                2. Price levels must be numbers (1, 2, 3, or 4), not $ symbols
-                3. Costs must be numbers without $ symbol
-                4. Ratings must be numbers between 0 and 5
+                        Available Venues:
+                        Food: ${food.map(f => `${f.name}|${f.rating}|${f.price_level || 'NA'}`).join(', ')}
+                        Activities: ${activities.map(a => `${a.name}|${a.rating}|${a.price_level || 'NA'}`).join(', ')}
 
-                Example of REQUIRED format for one day:
-                {
-                "day1": {
-                "date": "${dates[0]}",
-                "morning": {
-                "breakfast": { "name": "Venue Name", "rating": 4.5, "price_level": 2, "cost": 25 },
-                "activity": { "name": "Venue Name", "rating": 4.3, "price_level": 3, "cost": 45 }
-                },
-                ...
-                }
-                }`;
+                        Rules:
+                        1. Each day: 3 meals + 1-2 activities
+                        2. Use venues rated ≥4.0 only
+                        3. No repeating venues
+                        4. Price levels: 1($<15/25), 2($15-30/25-50), 3($30-60/50-100), 4($>60/100)
+                        5. Dates order: ${dates.join(', ')}
 
-        return userPrompt;
-}
+                        Return only valid JSON. No explanations.`;
+
+    return userPrompt;
+};
