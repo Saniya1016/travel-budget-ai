@@ -41,7 +41,7 @@ export default function Navbar() {
     <nav className="bg-gray-800 text-white p-4">
       <ul className="flex gap-4">
         <li><Link href="/">Home</Link></li> {/* Replace <a> with <Link> */}
-        <li><Link href="/about">About</Link></li> {/* Replace <a> with <Link> */}
+        <li><Link href="/">About</Link></li> {/* Replace <a> with <Link> */}
         {user ? (
           <>
             <li><Link href="/dashboard">Dashboard</Link></li> {/* Replace <a> with <Link> */}
