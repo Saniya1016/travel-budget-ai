@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 
 export async function middleware(request) {
 
-    // console.log("middleware hit", request);
-
     const token = request.cookies.get('authToken'); // Or get the token from headers
   
     if (!token) {
@@ -37,4 +35,3 @@ export async function middleware(request) {
 export const config = {
     matcher: ['/dashboard/:path*'], // Protect routes under /dashboard
 };
-  
