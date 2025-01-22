@@ -47,6 +47,10 @@ function addCorsHeaders(response, origin) {
 export async function middleware(request) {
   console.log("Middleware called for path:", request.nextUrl.pathname);
   const origin = request.headers.get('origin');
+
+  if (request.nextUrl.pathname.startsWith('/api/login') && request.method !== 'OPTIONS') {
+    return NextResponse.next();
+  }
   
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
