@@ -39,7 +39,7 @@ export default function Page() {
       if (!response.success) {
         throw new Error('Server authentication failed');
       }
-
+      console.log("trying to push dashboard");
       router.push('/dashboard');
 
     } catch (error) {

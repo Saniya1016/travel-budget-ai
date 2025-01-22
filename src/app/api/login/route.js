@@ -6,14 +6,16 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const { idToken } = await request.json();
-    // console.log(idToken);
+    console.log(idToken);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+
 
     // Set HttpOnly, secure cookie
     const response = NextResponse.json({ success: true });
     response.cookies.set('authToken', idToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', //strict or none or lax
       path: '/',
       maxAge: 3600 // 1 hour
     });
