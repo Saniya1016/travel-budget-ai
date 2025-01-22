@@ -45,10 +45,12 @@ function addCorsHeaders(response, origin) {
 }
 
 export async function middleware(request) {
+  console.log("Middleware called for path:", request.nextUrl.pathname);
   const origin = request.headers.get('origin');
   
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
+    console.log("Handling OPTIONS request");
     const response = new NextResponse(null, { status: 200 });
     addCorsHeaders(response, origin);
     return response;
@@ -114,7 +116,7 @@ export async function middleware(request) {
 
 export const config = {
   matcher: [
-    '/api/:path((?!auth).*)',
+    '/api/:path*',  // Changed to catch all API routes including auth
     '/dashboard/:path*',
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
