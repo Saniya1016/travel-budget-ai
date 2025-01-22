@@ -58,12 +58,24 @@ export async function middleware(request) {
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     const token = request.cookies.get('authToken');
 
+    console.log("Token exists:", !!token);
+    console.log("Token value:", token?.value);
+
     if (!token) {
+      console.log("No token found, redirecting to login");
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/auth`, {
+      // const authUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth`;
+      const authUrl = new URL('/api/auth', request.url).toString();
+
+      console.log("Attempting auth request to:", authUrl);
+      console.log("Current request URL:", request.url);
+      console.log("Environment:", process.env.NODE_ENV);
+      console.log("NEXT_PUBLIC_SITE_URL:", process.env.NEXT_PUBLIC_SITE_URL);
+
+      const res = await fetch(authUrl, {
         method: 'POST',
         credentials: 'include',
         headers: {
