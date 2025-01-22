@@ -5,10 +5,19 @@ function isAllowedOrigin(origin) {
   const allowedOrigins = [
     'http://localhost:3000',
     'https://travel-budget-ai-ci31.vercel.app',
-    process.env.NEXT_PUBLIC_SITE_URL
+    process.env.NEXT_PUBLIC_SITE_URL,
+    /^https:\/\/travel-budget-ai-ci31\.[^.]+\.vercel\.app$/,
   ].filter(Boolean); // Remove any undefined values
 
-  return !origin || allowedOrigins.includes(origin);
+  return !origin || allowedOrigins.some(pattern => {
+    if (typeof pattern === 'string') {
+      return origin === pattern; // Direct string match
+    }
+    if (pattern instanceof RegExp) {
+      return pattern.test(origin); // Regex match
+    }
+    return false;
+  });
 }
 
 export async function middleware(request) {
