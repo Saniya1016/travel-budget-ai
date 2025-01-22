@@ -1,23 +1,40 @@
 import { NextResponse } from "next/server";
 
-// Helper function to check if origin is allowed
 function isAllowedOrigin(origin) {
+  if (!origin) return true;
+
+  // Create array of allowed origins
   const allowedOrigins = [
     'http://localhost:3000',
-    'https://travel-budget-ai-ci31.vercel.app',
-    process.env.NEXT_PUBLIC_SITE_URL,
-    /^https:\/\/travel-budget-ai-ci31\.[^.]+\.vercel\.app$/,
-  ].filter(Boolean); // Remove any undefined values
+    'https://travel-budget-ai-ci31.vercel.app'
+  ];
 
-  return !origin || allowedOrigins.some(pattern => {
-    if (typeof pattern === 'string') {
-      return origin === pattern; // Direct string match
-    }
-    if (pattern instanceof RegExp) {
-      return pattern.test(origin); // Regex match
-    }
-    return false;
-  });
+  // Add NEXT_PUBLIC_SITE_URL if it exists
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    allowedOrigins.push(process.env.NEXT_PUBLIC_SITE_URL);
+  }
+
+  // Direct match for exact origins
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  // Check for Vercel preview deployments
+  const vercelPreviewRegex = /^https:\/\/travel-budget-ai-ci31-[a-zA-Z0-9-]+-saniya1016s-projects\.vercel\.app$/;
+  if (vercelPreviewRegex.test(origin)) {
+    return true;
+  }
+
+  return false;
+}
+
+function addCorsHeaders(response, origin) {
+  if (!isAllowedOrigin(origin)) return;
+
+  response.headers.set('Access-Control-Allow-Origin', origin);
+  response.headers.set('Access-Control-Allow-Credentials', 'true');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version');
 }
 
 export async function middleware(request) {
@@ -25,15 +42,9 @@ export async function middleware(request) {
   
   // Handle preflight requests
   if (request.method === 'OPTIONS') {
-    return new NextResponse(null, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': isAllowedOrigin(origin) ? origin : '',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version',
-        'Access-Control-Allow-Credentials': 'true',
-      },
-    });
+    const response = new NextResponse(null, { status: 200 });
+    addCorsHeaders(response, origin);
+    return response;
   }
 
   // For protected routes
@@ -47,6 +58,8 @@ export async function middleware(request) {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/auth`, {
         method: 'POST',
+        mode: 'cors',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token.value}`,
@@ -59,13 +72,7 @@ export async function middleware(request) {
 
       const data = await res.json();
       const response = NextResponse.next();
-
-      // Add CORS headers
-      if (isAllowedOrigin(origin)) {
-        response.headers.set('Access-Control-Allow-Origin', origin);
-        response.headers.set('Access-Control-Allow-Credentials', 'true');
-      }
-      
+      addCorsHeaders(response, origin);
       response.headers.set('user-id', data.userId);
       return response;
     } catch (error) {
@@ -74,12 +81,16 @@ export async function middleware(request) {
     }
   }
 
-  // For non-protected routes
-  const response = NextResponse.next();
-  if (isAllowedOrigin(origin)) {
-    response.headers.set('Access-Control-Allow-Origin', origin);
-    response.headers.set('Access-Control-Allow-Credentials', 'true');
+  // For API routes
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    const response = NextResponse.next();
+    addCorsHeaders(response, origin);
+    return response;
   }
+
+  // For all other routes
+  const response = NextResponse.next();
+  addCorsHeaders(response, origin);
   return response;
 }
 
