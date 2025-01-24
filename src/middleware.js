@@ -12,6 +12,7 @@ export async function middleware(request) {
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/auth`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token.value}`,
