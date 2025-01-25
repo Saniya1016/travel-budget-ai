@@ -13,12 +13,6 @@ export async function POST(request) {
         // Verify the token with Firebase Admin SDK
         const decodedToken = await adminAuth.verifyIdToken(token);
 
-        // Check if the token has expired
-        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-        if (decodedToken.exp < currentTime) {
-            return NextResponse.json({ success: false, error: 'Token expired' }, { status: 401 });
-        }
-
         // Return the decoded user ID
         return NextResponse.json({ success: true, userId: decodedToken.uid }, { status: 200 });
 

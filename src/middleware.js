@@ -4,21 +4,7 @@ export async function middleware(request, r) {
 
     console.log("Middleware hit with request: ", request.url);
 
-    // const token = request.cookies.get('authToken'); // Or get the token from headers
-
-    const cookies = request.cookies.getAll();
-    console.log("All cookies in middleware:", cookies);
-
-    const token = 
-        request.cookies.get('authToken')?.value || 
-        request.headers.get('cookie')?.split('authToken=')[1]?.split(';')[0] ||
-        request.cookies.get('authToken');
-
-      console.log('Token retrieval attempts:', {
-        cookiesGet: request.cookies.get('authToken'),
-        headersCookie: request.headers.get('cookie'),
-        token
-      });
+    const token = request.cookies.get('authToken');
   
     if (!token) {
         return NextResponse.redirect(new URL('/login', request.url));
