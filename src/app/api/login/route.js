@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const { idToken } = await request.json();
-    console.log(idToken);
+    console.log("In api/login token: ", idToken);
     console.log('NODE_ENV:', process.env.NODE_ENV);
 
 
@@ -17,6 +17,7 @@ export async function POST(request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none', //strict or none or lax
       path: '/',
+      domain: NEXT_PUBLIC_FRONTEND_URL,
       maxAge: 3600 // 1 hour
     });
 
