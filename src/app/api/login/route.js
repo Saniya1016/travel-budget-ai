@@ -18,7 +18,7 @@ export async function POST(request) {
       sameSite: 'none', //strict or none or lax
       path: '/',
       maxAge: 3600, // 1 hour
-      // domain: '.vercel.app'
+      domain: '.vercel.app'
     });
 
     return response;
