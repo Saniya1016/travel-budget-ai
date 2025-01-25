@@ -15,7 +15,7 @@ export async function POST(request) {
     response.cookies.set('authToken', idToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', //strict or none or lax
+      sameSite: 'none', //strict or none or lax
       path: '/',
       maxAge: 3600 // 1 hour
     });
