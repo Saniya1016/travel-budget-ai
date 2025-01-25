@@ -17,7 +17,6 @@ export async function POST(request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none', //strict or none or lax
       path: '/',
-      domain: NEXT_PUBLIC_FRONTEND_URL,
       maxAge: 3600 // 1 hour
     });
 
