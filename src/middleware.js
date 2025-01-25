@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 
-export async function middleware(request) {
+export async function middleware(request, r) {
 
     console.log("Middleware hit with request: ", request.url);
 
     // const token = request.cookies.get('authToken'); // Or get the token from headers
+
+    const cookies = request.cookies.getAll();
+    console.log("All cookies in middleware:", cookies);
 
     const token = 
         request.cookies.get('authToken')?.value || 
@@ -28,7 +31,7 @@ export async function middleware(request) {
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token.value}`,
+            'Authorization': `Bearer ${token?.value}`,
           },
       });
 
