@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 
 export async function middleware(request) {
 
+    console.log("Middleware hit with request: ", request.url);
+
     const token = request.cookies.get('authToken'); // Or get the token from headers
+
+    console.log("Token auth in middleware: ", token);
   
     if (!token) {
         return NextResponse.redirect(new URL('/login', request.url));
