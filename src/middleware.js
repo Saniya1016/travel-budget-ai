@@ -6,7 +6,10 @@ export async function middleware(request) {
 
     const token = request.cookies.get('authToken'); // Or get the token from headers
 
+    const check_token = request.headers.get('cookie')?.split('authToken=')[1]?.split(';')[0];
+
     console.log("Token auth in middleware: ", token);
+    console.log("Token auth in middleware: ", check_token);
   
     if (!token) {
         return NextResponse.redirect(new URL('/login', request.url));
