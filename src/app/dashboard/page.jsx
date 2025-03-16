@@ -37,8 +37,6 @@ export default async function page() {
   }
   
   const trips = await getTrips(userId);
-  
-
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col items-center py-10 px-4">

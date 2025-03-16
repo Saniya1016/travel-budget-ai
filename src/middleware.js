@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function middleware(request, r) {
+export async function middleware(request) {
 
     console.log("Middleware hit with request: ", request.url);
 

@@ -6,8 +6,8 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const { idToken } = await request.json();
-    console.log("In api/login token: ", idToken);
-    console.log('NODE_ENV:', process.env.NODE_ENV);
+    // console.log("In api/login token: ", idToken);
+    // console.log('NODE_ENV:', process.env.NODE_ENV);
 
 
     // Set HttpOnly, secure cookie
@@ -15,10 +15,9 @@ export async function POST(request) {
     response.cookies.set('authToken', idToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none', //strict or none or lax
+      sameSite: 'strict', //strict or none or lax
       path: '/',
-      maxAge: 3600, // 1 hour
-      domain: '.vercel.app'
+      maxAge: 3600 // 1 hour
     });
 
     return response;
